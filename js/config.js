@@ -2,7 +2,7 @@
    Ha a nevet át akarod írni, csak az APP_NAME értéket kell módosítani. */
 window.APP_CONFIG = {
   APP_NAME: 'Szókikérdező program',
-  VERSION: '0.2.1',
+  VERSION: '0.2.2',
   MIN_PAIRS: 10,
   STORAGE_KEY: 'szk:v1',
   SCHEMA_VERSION: 2,

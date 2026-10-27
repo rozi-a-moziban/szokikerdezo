@@ -108,7 +108,7 @@
       h += '<h3>' + esc(o.title || '') + '</h3>';
       if (o.text) h += '<p>' + esc(o.text) + '</p>';
       if (o.html) h += o.html;
-      if (o.input) h += '<input class="field" id="dlgIn" value="' + esc(o.input.value || '') + '" aria-label="' + esc(o.input.label || '') + '">';
+      if (o.input) h += '<input class="field" id="dlgVal" value="' + esc(o.input.value || '') + '" aria-label="' + esc(o.input.label || '') + '">';
       if (o.choices) {
         o.choices.forEach(function (c, i) { h += '<button class="btn choice" data-i="' + i + '">' + (c.icon ? ico(c.icon) : '') + '<span>' + esc(c.label) + '</span></button>'; });
       }
@@ -127,8 +127,8 @@
       function done(v) { document.removeEventListener('keydown', onKey, true); ov.remove(); resolve(v); }
       function onKey(e) {
         if (e.key === 'Escape') { e.preventDefault(); done(null); }
-        if (e.key === 'Enter' && o.input && document.activeElement && document.activeElement.id === 'dlgIn') {
-          e.preventDefault(); done({ value: ov.querySelector('#dlgIn').value });
+        if (e.key === 'Enter' && o.input && document.activeElement && document.activeElement.id === 'dlgVal') {
+          e.preventDefault(); done({ value: ov.querySelector('#dlgVal').value });
         }
       }
       document.addEventListener('keydown', onKey, true);
@@ -138,14 +138,14 @@
         if (c) { done(o.choices[+c.getAttribute('data-i')].v); return; }
         if (b) {
           const bt = o.buttons[+b.getAttribute('data-b')];
-          if (o.input && bt.v === 'ok') done({ value: ov.querySelector('#dlgIn').value });
+          if (o.input && bt.v === 'ok') done({ value: ov.querySelector('#dlgVal').value });
           else if (o.collect && bt.v === 'ok') done({ v: 'ok', checks: collect() });
           else done(bt.v);
           return;
         }
         if (e.target === ov && !o.noBackdropClose) done(null);
       });
-      const inp = ov.querySelector('#dlgIn');
+      const inp = ov.querySelector('#dlgVal');
       if (inp) { inp.focus(); inp.select(); }
       else { const p = ov.querySelector('.btn.primary') || ov.querySelector('.btn'); if (p) p.focus(); }
     });
@@ -337,8 +337,8 @@
     const e = view.edit;
     let h = header({ back: 'cancelEdit', title: e.listId ? T('editList') : T('newListTitle'),
       right: '<button class="btn primary" id="esave" data-act="saveEdit">' + esc(T('save')) + '</button>' });
-    h += '<div class="frow"><label class="flbl" for="ename">' + esc(T('listName')) + '</label>' +
-      '<input class="field" id="ename" value="' + esc(e.name) + '" autocomplete="off" placeholder="' + esc(T('listNamePh')) + '"></div>';
+    h += '<div class="frow"><label class="flbl" for="listTitle">' + esc(T('listName')) + '</label>' +
+      '<input class="field" id="listTitle" data-form-type="other" autocapitalize="sentences" value="' + esc(e.name) + '" autocomplete="off" placeholder="' + esc(T('listNamePh')) + '"></div>';
     h += '<div class="frow"><span class="flbl">' + esc(T('loadVocab')) + '</span><div class="row two">' +
       '<button class="btn" data-act="loadFile">' + ico('file') + esc(T('file')) + '</button>' +
       '<button class="btn" data-act="photo">' + ico('camera') + esc(T('photo')) + '</button></div></div>';
@@ -347,8 +347,8 @@
       '<label class="lcol"><span>' + esc(T('col2')) + '</span>' + langSelect('langB', e.langs.b) + '</label></div></div>';
     h += '<div id="banners"></div>';
     h += '<section class="addrow glass" aria-label="' + esc(T('addTitle')) + '"><div class="add-h">' + esc(T('addTitle')) + '</div><div class="add-f">' +
-      '<input class="field" id="addA" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="next" aria-label="' + esc(cap(langName(e.langs.a))) + '" placeholder="' + esc(cap(langName(e.langs.a))) + '">' +
-      '<input class="field" id="addB" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="enter" aria-label="' + esc(cap(langName(e.langs.b))) + '" placeholder="' + esc(cap(langName(e.langs.b))) + '">' +
+      '<input class="field" id="pairQ" autocomplete="off" data-form-type="other" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="next" aria-label="' + esc(cap(langName(e.langs.a))) + '" placeholder="' + esc(cap(langName(e.langs.a))) + '">' +
+      '<input class="field" id="pairR" autocomplete="off" data-form-type="other" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="enter" aria-label="' + esc(cap(langName(e.langs.b))) + '" placeholder="' + esc(cap(langName(e.langs.b))) + '">' +
       '<button class="btn primary" data-act="addPair">' + ico('plus') + esc(T('addBtn')) + '</button></div><div id="addSpell"></div>' +
       '<p class="fine">' + esc(T('addHint')) + '</p></section>';
     h += '<div class="rulerow"><span id="ehint"></span><span id="emin"></span></div>';
@@ -547,7 +547,7 @@
     box.innerHTML = h;
     const hint = document.getElementById('ehint');
     if (hint) hint.textContent = T('pairsHint', { a: langName(e.langs.a), b: langName(e.langs.b) });
-    const aa = document.getElementById('addA'), bb = document.getElementById('addB');
+    const aa = document.getElementById('pairQ'), bb = document.getElementById('pairR');
     if (aa) { aa.placeholder = cap(langName(e.langs.a)); aa.setAttribute('aria-label', aa.placeholder); }
     if (bb) { bb.placeholder = cap(langName(e.langs.b)); bb.setAttribute('aria-label', bb.placeholder); }
   }
@@ -589,7 +589,7 @@
   /* Beviteli sor: két mező, Enterrel léptet; a pár a szövegdoboz végére kerül. */
   function addPair() {
     const e = view.edit;
-    const fa = document.getElementById('addA'), fb = document.getElementById('addB');
+    const fa = document.getElementById('pairQ'), fb = document.getElementById('pairR');
     const a = fa.value.trim().replace(/\s+/g, ' '), b = fb.value.trim().replace(/\s+/g, ' ');
     if (!a) { fa.focus(); return; }
     if (!b) { fb.focus(); return; }
@@ -608,7 +608,7 @@
     if (!box) return;
     const extra = [S.dictSet(), new Set(e.ignore)];
     let hit = null;
-    [['addA', e.langs.a], ['addB', e.langs.b]].forEach(function (f) {
+    [['pairQ', e.langs.a], ['pairR', e.langs.b]].forEach(function (f) {
       if (hit || !SP.get(f[1])) return;
       const val = document.getElementById(f[0]).value;
       SP.tokens(val, 0).forEach(function (t) {
@@ -748,14 +748,14 @@
   function bindEditor() {
     const e = view.edit;
     const el = edEls();
-    const n = document.getElementById('ename');
+    const n = document.getElementById('listTitle');
     n.addEventListener('input', function () { e.name = n.value; });
     el.ta.addEventListener('input', function () { e.activeLine = lineOf(el.ta.value, el.ta.selectionStart); e.text = el.ta.value; e.importInfo = e.importInfo && e.undo != null ? e.importInfo : null; edRefresh(false); fitBackdrop(); });
     el.ta.addEventListener('scroll', function () { el.back.scrollTop = el.ta.scrollTop; });
     const track = function () { e.activeLine = lineOf(e.text, el.ta.selectionStart); };
     el.ta.addEventListener('focus', track);
     el.ta.addEventListener('blur', function () { e.activeLine = null; updateCheck(); });
-    const fa = document.getElementById('addA'), fb = document.getElementById('addB');
+    const fa = document.getElementById('pairQ'), fb = document.getElementById('pairR');
     fa.addEventListener('keydown', function (ev) { if (ev.key === 'Enter') { ev.preventDefault(); if (fa.value.trim()) fb.focus(); } });
     fb.addEventListener('keydown', function (ev) { if (ev.key === 'Enter') { ev.preventDefault(); addPair(); } });
     fa.addEventListener('input', addSpell);
@@ -775,7 +775,7 @@
     const e = view.edit;
     const name = e.name.trim();
     const parsed = E.parseLines(e.text);
-    if (!name) { toast(T('needName')); document.getElementById('ename').focus(); return; }
+    if (!name) { toast(T('needName')); document.getElementById('listTitle').focus(); return; }
     if (parsed.pairs.length === 0) { toast(T('noPairs')); return; }
     if (parsed.errors.length || E.findDuplicates(parsed.pairs).length) { toast(T('fixFirst')); updateCheck(); return; }
     const old = e.listId ? S.getList(e.listId) : null;
@@ -859,7 +859,7 @@
       const e = view.edit;
       e.undo = e.text;
       e.importInfo = { n: st.pairs, name: file.name };
-      if (!e.name.trim()) { e.name = baseName; document.getElementById('ename').value = baseName; }
+      if (!e.name.trim()) { e.name = baseName; document.getElementById('listTitle').value = baseName; }
       e.dirDismissed = false;
       setEditText(e.text.trim() ? e.text.replace(/\s*$/, '') + '\n' + text : text);
     } else {
@@ -925,7 +925,7 @@
       const e = view.edit;
       e.undo = e.text;
       e.importInfo = { n: p.pairs.length, name: fileName };
-      if (!e.name.trim()) { e.name = p.name; document.getElementById('ename').value = p.name; }
+      if (!e.name.trim()) { e.name = p.name; document.getElementById('listTitle').value = p.name; }
       setEditText((e.text.trim() ? e.text.replace(/\s*$/, '') + '\n' : '') + E.serialize(p.pairs));
       return;
     }
