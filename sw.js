@@ -1,5 +1,5 @@
 /* Offline gyorsítótár. A VERSION növelésével a régi gyorsítótár törlődik. */
-const VERSION = 'szk-0.2.2';
+const VERSION = 'szk-0.2.3';
 const FILES = [
   './', './index.html', './manifest.webmanifest',
   './css/style.css',
